@@ -49,6 +49,15 @@ alert_on_successful_login = true
 # Track commands executed after successful login
 track_commands_after_login = true
 
+# Auto-block IPs using iptables after failed attempts
+auto_block_enabled = true
+
+# Number of failed attempts before blocking IP
+auto_block_threshold = 3
+
+# How long to block IP (in seconds) - default 1 hour
+block_duration_secs = 3600
+
 [paths]
 # Path to SSH authentication log
 auth_log = "/var/log/auth.log"
