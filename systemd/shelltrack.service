@@ -1,0 +1,33 @@
+[Unit]
+Description=ShellTrack - SSH Security Monitoring
+Documentation=https://github.com/shelltrack/shelltrack
+After=network.target auditd.service
+Wants=auditd.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/shelltrack/shelltrack --config /etc/shelltrack/shelltrack.toml
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=false
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ReadWritePaths=/var/log/shelltrack /etc/shelltrack
+
+# Resource limits
+MemoryMax=256M
+TasksMax=100
+
+# Environment
+Environment="RUST_LOG=info"
+Environment="RUST_BACKTRACE=1"
+
+[Install]
+WantedBy=multi-user.target

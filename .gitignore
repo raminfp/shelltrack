@@ -1,0 +1,28 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude AI files
+.claude/
+
+# Local configuration
+*.local
+
+# Logs
+*.log
+
+# Test artifacts
+/test-output/
+

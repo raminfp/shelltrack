@@ -1,0 +1,155 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags like v1.0.0
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run tests
+        run: cargo test --verbose
+
+  build:
+    name: Build for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            name: shelltrack-x86_64-ubuntu22.04.tar.gz
+          
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            name: shelltrack-x86_64-ubuntu24.04.tar.gz
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-build-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install dependencies for Ubuntu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libssl-dev
+
+      - name: Build for target
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+        
+      - name: Package artifact
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/shelltrack dist/
+          cp README.md dist/ || echo "No README.md found"
+          cp LICENSE dist/ || echo "No LICENSE file found"
+          cp -r config/ dist/ || echo "No config directory found"
+          cp -r systemd/ dist/ || echo "No systemd directory found"
+          cp scripts/install.sh dist/ || echo "No install.sh found"
+          chmod +x dist/install.sh
+          tar -czf ${{ matrix.name }} -C dist .
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.name }}
+
+  release:
+    name: Create Release
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            **/*.tar.gz
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            ## ShellTrack Release ${{ github.ref_name }}
+            
+            A secure SSH monitoring tool that detects brute force attacks and tracks command execution.
+            
+            ### Features
+            - Real-time SSH brute force attack detection
+            - Telegram notifications for security events
+            - Command tracking for authenticated users
+            - Cloud storage integration (Cloudflare R2)
+            - Audit log monitoring
+            
+            ### Installation
+            
+            1. Download the appropriate binary for your system:
+               - Ubuntu 22.04: `shelltrack-x86_64-ubuntu22.04.tar.gz`
+               - Ubuntu 24.04: `shelltrack-x86_64-ubuntu24.04.tar.gz`
+            
+            2. Extract the archive:
+               ```bash
+               tar -xzf shelltrack-x86_64-*.tar.gz
+               ```
+            
+            3. Configure the service as described in the README
+            
+            ### System Requirements
+            - Ubuntu 22.04 LTS or Ubuntu 24.04 LTS
+            - systemd (for service management)
+            - auditd (for command tracking)

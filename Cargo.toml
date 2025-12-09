@@ -1,0 +1,62 @@
+[package]
+name = "shelltrack"
+version = "0.1.0"
+edition = "2021"
+authors = ["ShellTrack Team"]
+description = "SSH security monitoring with brute force detection and alerting"
+license = "MIT"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.34", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# HTTP client for Telegram API and R2
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# AWS S3 signing for R2 (using rust-s3 with rustls)
+rust-s3 = { version = "0.35", default-features = false, features = ["tokio-rustls-tls"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# File watching
+notify = "6.1"
+
+# Regex for log parsing
+regex = "1.10"
+
+# Async channels
+async-channel = "2.1"
+
+# IP address handling
+ipnetwork = "0.20"
+
+# CLI argument parsing
+clap = { version = "4.4", features = ["derive"] }
+
+# Get hostname
+gethostname = "0.4"
+
+# Get user info from UID
+users = "0.11"
+
+# Async trait support
+async-trait = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true

@@ -1,0 +1,57 @@
+# ShellTrack Configuration File
+# Copy this file to /etc/shelltrack/shelltrack.toml
+
+[general]
+# Log level: trace, debug, info, warn, error
+log_level = "info"
+
+# Override hostname (optional - auto-detected if not set)
+# hostname = "my-server"
+
+[telegram]
+# Enable Telegram notifications
+enabled = true
+
+# Your Telegram bot token from @BotFather
+bot_token = "YOUR_BOT_TOKEN_HERE"
+
+# Chat ID to send notifications to
+# Use @userinfobot to get your chat ID
+chat_id = "YOUR_CHAT_ID_HERE"
+
+[r2]
+# Enable Cloudflare R2 storage for logs
+enabled = false
+
+# Your Cloudflare account ID
+account_id = "YOUR_ACCOUNT_ID"
+
+# R2 API credentials (create in Cloudflare dashboard)
+access_key_id = "YOUR_ACCESS_KEY_ID"
+secret_access_key = "YOUR_SECRET_ACCESS_KEY"
+
+# R2 bucket name
+bucket_name = "shelltrack-logs"
+
+[detection]
+# Number of failed attempts to trigger brute force alert
+brute_force_threshold = 3
+
+# Time window in seconds for counting failed attempts
+brute_force_window_secs = 60
+
+# Send notification every N new failed attempts after threshold is reached
+alert_every_n_attempts = 2
+
+# Send alert on any successful SSH login
+alert_on_successful_login = true
+
+# Track commands executed after successful login
+track_commands_after_login = true
+
+[paths]
+# Path to SSH authentication log
+auth_log = "/var/log/auth.log"
+
+# Path to audit log (auditd)
+audit_log = "/var/log/audit/audit.log"
