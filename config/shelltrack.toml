@@ -35,13 +35,13 @@ bucket_name = "shelltrack-logs"
 
 [detection]
 # Number of failed attempts to trigger brute force alert
-brute_force_threshold = 3
+brute_force_threshold = 10
 
 # Time window in seconds for counting failed attempts
 brute_force_window_secs = 60
 
 # Send notification every N new failed attempts after threshold is reached
-alert_every_n_attempts = 2
+alert_every_n_attempts = 5
 
 # Send alert on any successful SSH login
 alert_on_successful_login = true
@@ -53,7 +53,7 @@ track_commands_after_login = true
 auto_block_enabled = true
 
 # Number of failed attempts before blocking IP
-auto_block_threshold = 3
+auto_block_threshold = 10
 
 # How long to block IP (in seconds) - default 1 hour
 block_duration_secs = 3600
